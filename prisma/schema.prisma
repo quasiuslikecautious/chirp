@@ -21,6 +21,7 @@ model Post {
 
     content   String   @db.VarChar(255)
     authorId  String
+    author    User     @relation(fields: [authorId], references: [id])
 
     @@index([authorId])
 }
@@ -60,6 +61,7 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    posts         Post[]
 }
 
 model VerificationToken {
