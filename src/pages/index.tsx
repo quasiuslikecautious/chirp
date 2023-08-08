@@ -1,24 +1,28 @@
+import { useState } from "react";
+
+import Head from "next/head";
 import  Image from "next/image";
 import { signIn, useSession } from "next-auth/react";
-import Head from "next/head";
+import type { NextPage } from "next";
 
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { LoadingPage, LoadingSpinner } from "~/components/loading";
-import { NextPage } from "next";
-import { useState } from "react";
 import { toast } from "react-hot-toast";
+
+import { LoadingPage, LoadingSpinner } from "~/components/loading";
 
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
   const { data: sessionData } = useSession();
+  const ctx = api.useContext();
+  const [input, setInput] = useState<string>("");
+
   if (!sessionData) return null;
 
-  const ctx = api.useContext();
   const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
     onSuccess: () => {
       setInput("");
@@ -26,15 +30,13 @@ const CreatePostWizard = () => {
     },
     onError: (e) => {
       const errorMessage = e.data?.zodError?.fieldErrors.content;
-      if (errorMessage && errorMessage[0]) {
+      if (errorMessage?.[0]) {
         toast.error(errorMessage[0]);
       } else {
         toast.error("Failed to post! Please try again later.");
       }
     },
   });
-
-  const [input, setInput] = useState<string>("");
 
   return (
     <>
@@ -140,7 +142,7 @@ const Home: NextPage = () => {
                 className="flex justify-center"
                 onClick={() => void signIn()}
               >
-                "Sign in"
+                Sign in
               </button>
             )}
 
