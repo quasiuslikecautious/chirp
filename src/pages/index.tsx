@@ -1,23 +1,19 @@
 import { useState } from "react";
 
-import  Image from "next/image";
-import { signIn, useSession } from "next-auth/react";
 import type { NextPage } from "next";
+import Image from "next/image";
+
+import { signIn, useSession } from "next-auth/react";
 
 import { api } from "~/utils/api";
-import type { RouterOutputs } from "~/utils/api";
 
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import { toast } from "react-hot-toast";
 
 import { LoadingPage, LoadingSpinner } from "~/components/loading";
-import Link from "next/link";
 import { PageLayout } from "~/components/layout";
+import { PostView } from "~/components/postview";
 
-dayjs.extend(relativeTime);
-
-const CreatePostWizard = () => {
+export const CreatePostWizard = () => {
   const { data: sessionData } = useSession();
   const ctx = api.useContext();
   const [input, setInput] = useState<string>("");
@@ -78,37 +74,6 @@ const CreatePostWizard = () => {
           )}
         </div>
       )}
-    </>
-  );
-};
-
-
-type PostWithUser = RouterOutputs["posts"]["getAll"][number];
-
-const PostView = (props: PostWithUser) => {
-  return (
-    <>
-      <div key={props.id} className="flex border-b border-slate-400 p-4 items-center gap-3">
-        <Image
-          src={props.author.image!}
-          className="h-14 w-14 rounded-full"
-          alt={`@{props.author.name}'s profile picture`}
-          width={56}
-          height={56}
-        />
-        <div className="flex flex-col">
-          <Link href={`/@${props.author.name}`}>
-            <div className="flex text-slate-300 gap-1">
-              <span>{`@${props.author.name}`}</span>
-              <span className="font-thin">·</span>
-              <span className="font-thin">{dayjs(props.createdAt).fromNow()}</span>
-            </div>
-          </Link>
-          <Link href={`/post/${props.id}`}>
-            <span className="text-2xl">{props.content}</span>
-          </Link>
-        </div>
-      </div>
     </>
   );
 };

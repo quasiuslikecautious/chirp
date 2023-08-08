@@ -12,6 +12,24 @@ import superjson from "superjson";
 
 import { getSession } from "next-auth/react";
 import { PageLayout } from "~/components/layout";
+import { LoadingPage } from "~/components/loading";
+import { PostView } from "~/components/postview";
+
+const ProfileFeed = (props: { userId: string}) => {
+  const { data, isLoading } = api.posts.getPostsByUserId.useQuery({ userId: props.userId });
+
+  if (isLoading) return <LoadingPage />;
+
+  if (!data || data.length === 0) return <div>User has not posted</div>;
+
+  return (
+    <div className="flex flex-col">
+      {data.map((fullPost) => (
+        <PostView {...fullPost} key={fullPost.id} />
+      ))}
+    </div>
+  );
+};
 
 type PageProps = InferGetServerSidePropsType<typeof getStaticProps>;
 export default function ProfilePage(props: PageProps) {
@@ -38,6 +56,7 @@ export default function ProfilePage(props: PageProps) {
         <div className="h-[75px]" />
         <div className="p-4 text-2xl font-bold">{`@${data.name ?? ""}`}</div>
         <div className="border-b border-slate-400" />
+        <ProfileFeed userId={data.id} />
       </PageLayout>
     </>
   );
