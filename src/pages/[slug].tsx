@@ -2,15 +2,9 @@ import Head from "next/head";
 import Image from "next/image";
 import type { GetStaticPaths, GetStaticPropsContext, InferGetServerSidePropsType} from "next";
 
-import { createServerSideHelpers } from "@trpc/react-query/server";
-
 import { api } from "~/utils/api";
-import { prisma } from "~/server/db";
-import { appRouter } from "~/server/api/root"; 
+import { generateSSGHelper } from "~/server/helpers/ssgHelper";
 
-import superjson from "superjson";
-
-import { getSession } from "next-auth/react";
 import { PageLayout } from "~/components/layout";
 import { LoadingPage } from "~/components/loading";
 import { PostView } from "~/components/postview";
@@ -65,26 +59,18 @@ export default function ProfilePage(props: PageProps) {
 export async function getStaticProps (
   context: GetStaticPropsContext<{ slug: string }>
 ) {
-  const helpers = createServerSideHelpers({
-    router: appRouter,
-    ctx: { 
-      session: await getSession(), 
-      prisma,
-    },
-    transformer: superjson,
-  });
-
+  const ssg = await generateSSGHelper();
   
   const slug = context.params?.slug;
   if (typeof slug !== "string") throw new Error("no slug");
 
   const name = slug.replace("@", "");
 
-  await helpers.profiles.getUserByName.prefetch({ name });
+  await ssg.profiles.getUserByName.prefetch({ name });
 
   return {
     props: {
-      trpcState: helpers.dehydrate(),
+      trpcState: ssg.dehydrate(),
       name,
     },
     revalidate: 1,
